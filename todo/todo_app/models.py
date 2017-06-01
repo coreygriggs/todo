@@ -1,11 +1,28 @@
 from django.db import models
 
-class Todo(models.Model):
+
+class ToDo(models.Model):
+    """
+    todos
+    """
     TODO_STATUSES = (
         ('no', 'Not Started'),
         ('in', 'In Progress'),
         ('co', 'Completed'),
     )
-
-    created = models.DateTimeField(auto_now_add=True)
+    name = models.CharField(max_length=256)
     status = models.CharField(max_length=2, choices=TODO_STATUSES)
+
+class ToDoList(models.Model):
+    """
+    todo lists for different types of task lists
+    """
+    name = models.CharField(max_length=256)
+
+class ListToDos(models.Model):
+    """
+    relational table of todo lists and todos
+    """
+    todo = models.ForeignKey('ToDo')
+    todo_list = models.ForeignKey('ToDoList')
+    
