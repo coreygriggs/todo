@@ -1,0 +1,41 @@
+<html>
+    <head>
+        <title>ToDo App</title>
+        <link 
+            rel="stylesheet" 
+            href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" 
+            integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" 
+            crossorigin="anonymous">
+        <script 
+            src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" 
+            integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" 
+            crossorigin="anonymous"></script>
+        <script
+            src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4="
+            crossorigin="anonymous"></script> 
+        <script type="text/javascript">
+            $(document).ready(function() {
+                $('#add-list-btn').click(function() {
+                    $('#create-list-form').toggleClass('hidden');
+                });
+            });
+        </script>    
+    </head>
+    <body>
+        <h2>
+            My Todo Lists
+        </h2>
+            <ul class="list-group">
+                {% for todo_list in todo_lists %}
+                    <li class="list-group-item"><a href="/todo-list/{{todo_list.pk}}">{{ todo_list.name }}</a></li>
+                {% endfor %}
+            </ul>
+        <div><a id="add-list-btn" class="btn">Add a New List</a></div>
+        <form id="create-list-form" class="hidden" action="/" method="post">
+            {% csrf_token %}
+            {{ form }}
+            <input class="btn" type="submit" value="Create List">
+        </form>
+    </body>
+</html>

@@ -20,4 +20,6 @@ from todo_app import views
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^$', views.index, name='index'),
+    url(r'^todo-list/(?P<pk>[0-9])/$', views.todo_list, name='todo_list'),
+    url(r'^todo/(?P<pk>[0-9])/$', views.todo, name='todo')
 ]

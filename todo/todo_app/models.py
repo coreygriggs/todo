@@ -6,9 +6,8 @@ class ToDo(models.Model):
     todos
     """
     TODO_STATUSES = (
-        ('no', 'Not Started'),
-        ('in', 'In Progress'),
-        ('co', 'Completed'),
+        ('complete', 'complete'),
+        ('open', 'open'),
     )
     name = models.CharField(max_length=256)
     status = models.CharField(max_length=2, choices=TODO_STATUSES)
