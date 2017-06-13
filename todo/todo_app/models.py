@@ -5,23 +5,17 @@ class ToDo(models.Model):
     """
     todos
     """
-    TODO_STATUSES = (
-        ('complete', 'complete'),
+    CHOICES = (
         ('open', 'open'),
+        ('complete', 'complete')
     )
     name = models.CharField(max_length=256)
-    status = models.CharField(max_length=2, choices=TODO_STATUSES)
+    status = models.CharField(max_length=20, choices=CHOICES, default='open')
+    todo_list = models.ForeignKey('ToDoList')
 
 class ToDoList(models.Model):
     """
     todo lists for different types of task lists
     """
     name = models.CharField(max_length=256)
-
-class ListToDos(models.Model):
-    """
-    relational table of todo lists and todos
-    """
-    todo = models.ForeignKey('ToDo')
-    todo_list = models.ForeignKey('ToDoList')
     

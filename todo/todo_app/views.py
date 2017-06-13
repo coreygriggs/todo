@@ -1,41 +1,47 @@
-from django.shortcuts import render
-from .models import ToDo, ToDoList, ListToDos
-from .forms import AddToDoListForm, TodoForm
-
-def index(request):
-    if request.method == 'POST':
-        form = AddToDoListForm(request.POST)
-        if form.is_valid():
-            name = form.cleaned_data['name']
-            ToDoList.objects.create(name=name)
-    todo_lists = ToDoList.objects.all()
-    form = AddToDoListForm()
-    return render(request, 'index.html', {'todo_lists': todo_lists, 'form': form})
+from .models import ToDoList, ToDo
+from rest_framework import viewsets, views, response
+from .serializers import ToDoListSerializer, ToDoSerializer
+from rest_framework.parsers import JSONParser
+from django.http import HttpResponse
+from rest_framework.renderers import JSONRenderer
 
 
-def todo_list(request, pk):
-    # attach new todo to todo list
-    if request.method == 'POST':
-        form = TodoForm(request.POST)
-        if form.is_valid():
-            name = form.cleaned_data['name']
-            todo = ToDo.objects.create(name=name, status='active')
-            todo_list = ToDoList.objects.get(pk=pk)
-            ListToDos.objects.create(todo_list=todo_list, todo=todo)              
-    todo_list = ToDoList.objects.get(pk=pk) 
-    todos = []
-    if todo_list:
-        list_to_dos = ListToDos.objects.filter(todo_list=todo_list)
-        for item in list_to_dos:
-            todos.append(item.todo)
-    form = TodoForm()
-    return render(request, 'todo.html', {'todos': todos, 'pk': pk, 'form': form})
+class JSONResponse(HttpResponse):
+
+    def __init__(self, data, **kwargs):
+        self.data = data
+        content = JSONRenderer().render(data)
+        kwargs['content_type'] = 'application/json'
+        super(JSONResponse, self).__init__(content, **kwargs)
+
+    def json(self):
+        return self.data
 
 
-def todo(request, pk):
-    # complete task
-    if request.method == 'PATCH':
-        todo = ToDo.objects.get(pk=pk)
-        if todo:
-            todo.status = "complete"
-            todo.save()
+class TodoListViewSet(views.APIView):
+
+    def get(self, request, format='json'):
+        todo_lists = ToDoList.objects.all()
+        serializer = ToDoListSerializer(todo_lists, many=True)
+        return JSONResponse(serializer.data, status=200)
+
+    def post(self, request, format='json'):
+        data = JSONParser().parse(request)
+        if 'name' in data.keys():
+            new_todo_list = ToDoList(name=data['name'])
+            new_todo_list.save()
+            return JSONResponse({
+                'success': 'todo list created', 
+                'name': new_todo_list.name,
+                'list_id': new_todo_list.pk
+            }, status=201)
+        else:
+            return JSONResponse({'error': 'something went wrong'}, status=400)
+
+
+class TodoViewSet(views.APIView):
+
+    def get(self, request, format='json'):
+        todos = ToDo.objects.all()
+        serializer = ToDoSerializer(todos, many=True)
+        return JSONResponse(serializer.data, status=200)
