@@ -33,7 +33,7 @@ class TodoListViewSet(views.APIView):
             return JSONResponse({
                 'success': 'todo list created', 
                 'name': new_todo_list.name,
-                'list_id': new_todo_list.pk
+                'todo_list_id': new_todo_list.pk
             }, status=201)
         else:
             return JSONResponse({'error': 'something went wrong'}, status=400)
@@ -45,3 +45,19 @@ class TodoViewSet(views.APIView):
         todos = ToDo.objects.all()
         serializer = ToDoSerializer(todos, many=True)
         return JSONResponse(serializer.data, status=200)
+
+    def post(self, request, format='json'):
+        data = JSONParser().parse(request)
+        if 'todo_list_id' in data.keys():
+            todo_list = ToDoList.objects.get(pk=data['todo_list_id'])
+            todo = ToDo(name=data['name'], todo_list=todo_list)
+            todo.save()
+            return JSONResponse({
+                'success': 'todo added to list',
+                'name': data['name'],
+                'todo_id': todo.pk
+            })
+        else:
+            return JSONResponse({
+                'error': 'something went wrong'
+            }, status=400)

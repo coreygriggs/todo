@@ -32,3 +32,12 @@ class Todo(APITestCase):
         response = self.client.get(reverse('todos'), format='json')
         self.assertEqual(response.json()[0]['name'], 'take out trash')
 
+    def test_post_todo(self):
+        new_todo_list = create_todolist("Today's list")
+        self.client = APIClient(enforce_csrf_checks=False)
+        response = self.client.post(reverse('todos'), format='json', 
+            data={'name': 'take out trash', 'todo_list_id': new_todo_list.pk}
+        )
+        self.assertEquals(response.json()['name'], "take out trash")
+
+
