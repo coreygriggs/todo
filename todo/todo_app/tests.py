@@ -8,6 +8,15 @@ def create_todolist(name):
     new_list.save()
     return new_list
 
+def get_todo_list(pk):
+    todo_list = ToDoList.objects.get(pk=pk)
+    return todo_list
+
+def create_todo(name, todo_list):
+    todo = ToDo(name=name, todo_list=todo_list)
+    todo.save()
+    return todo
+
 class ToDoLists(APITestCase):
 
     def test_get_todo_lists(self):
@@ -40,4 +49,12 @@ class Todo(APITestCase):
         )
         self.assertEquals(response.json()['name'], "take out trash")
 
-
+    def test_put_todo(self):
+        new_todo_list = create_todolist("Today's list")
+        todo_list = get_todo_list(pk=new_todo_list.pk)
+        new_todo = create_todo("take out trash", new_todo_list)
+        self.client = APIClient(enforce_csrf_checks=False)
+        response = self.client.put(reverse('todos'), format='json',
+            data={'todo_id': new_todo.pk, 'name': 'New Name!'}
+        )
+        self.assertEquals(response.json()['name'], "New Name!")

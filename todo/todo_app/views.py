@@ -6,6 +6,10 @@ from django.http import HttpResponse
 from rest_framework.renderers import JSONRenderer
 
 
+def parse_json(request_data):
+    return JSONParser().parse(request_data)
+
+
 class JSONResponse(HttpResponse):
 
     def __init__(self, data, **kwargs):
@@ -15,7 +19,7 @@ class JSONResponse(HttpResponse):
         super(JSONResponse, self).__init__(content, **kwargs)
 
     def json(self):
-        return self.data
+        return self.data        
 
 
 class TodoListViewSet(views.APIView):
@@ -26,7 +30,7 @@ class TodoListViewSet(views.APIView):
         return JSONResponse(serializer.data, status=200)
 
     def post(self, request, format='json'):
-        data = JSONParser().parse(request)
+        data = parse_json(request)
         if 'name' in data.keys():
             new_todo_list = ToDoList(name=data['name'])
             new_todo_list.save()
@@ -47,7 +51,7 @@ class TodoViewSet(views.APIView):
         return JSONResponse(serializer.data, status=200)
 
     def post(self, request, format='json'):
-        data = JSONParser().parse(request)
+        data = parse_json(request)
         if 'todo_list_id' in data.keys():
             todo_list = ToDoList.objects.get(pk=data['todo_list_id'])
             todo = ToDo(name=data['name'], todo_list=todo_list)
@@ -61,3 +65,19 @@ class TodoViewSet(views.APIView):
             return JSONResponse({
                 'error': 'something went wrong'
             }, status=400)
+
+    def put(self, request, format='json'):
+        data = parse_json(request)
+        if 'todo_id' not in data.keys():
+            return JSONResponse({
+                'error': 'todo_id is required'
+            }, status=401)
+        else:
+            todo = ToDo.objects.get(pk=data['todo_id'])
+            todo.name = data['name']
+            todo.save()
+            return JSONResponse({
+                'success': 'todo has been created',
+                'name': data['name'],
+                'todo_id': todo.pk
+            }, status=201)
